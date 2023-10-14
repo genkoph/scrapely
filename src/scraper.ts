@@ -23,6 +23,10 @@ function scraper(url: string) {
       _commands.push(["find", selector]);
       return this;
     },
+    delay(ms: number) {
+      _commands.push(["delay", ms]);
+      return this;
+    },
     async data() {
       const { commands, initialContext } = transformCommands(_commands);
       const { data } = await iterateCommands(commands, initialContext);
@@ -84,6 +88,10 @@ const commandsFunctions: Record<string, Function> = {
   async find(context: Context, selector: string): Promise<Context> {
     const { $ } = context;
     return { ...context, scope: $(selector) };
+  },
+  async delay(context: Context, ms: number): Promise<Context> {
+    await new Promise((resolve) => setTimeout(resolve, ms));
+    return context;
   },
 };
 
