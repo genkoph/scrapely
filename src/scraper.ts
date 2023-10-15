@@ -1,12 +1,12 @@
 import superagent from "superagent";
-import { load, type CheerioAPI, type Cheerio, type Node } from "cheerio";
+import { load, type CheerioAPI, type Cheerio, type AnyNode } from "cheerio";
 
 type Selector = string | Object | (string | Object)[];
 
 interface Context {
   $: CheerioAPI;
   data: Selector | null;
-  scope: Cheerio<Node> | null;
+  scope: Cheerio<AnyNode> | null;
 }
 
 function scraper(url: string) {
@@ -19,7 +19,7 @@ function scraper(url: string) {
       _commands.push(["set", selector]);
       return this;
     },
-    find(selector: Selector) {
+    find(selector: string) {
       _commands.push(["find", selector]);
       return this;
     },
@@ -64,23 +64,75 @@ function transformCommands(commandsRaw: [string, Selector][]) {
 }
 
 const commandsFunctions: Record<string, Function> = {
-  // async set(context: Context, selector: string | string[]): Promise<Context> {
-  //   const { $, scope } = context;
+  async set(context: Context, selector: string | string[]): Promise<Context> {
+    const { $, scope } = context;
 
-  //   if (Array.isArray(selector)) {
-  //     return context;
-  //   }
+    if (Array.isArray(selector)) {
+      // case: multiple objects
+      if (typeof selector[0] === "object") {
+        if (!scope) {
+          throw new Error("Can't set an array of objects without a defined scope.")
+        }
 
-  //   if (typeof selector === "object") {
-  //     const data = Object.fromEntries(
-  //       Object.entries(selector).map(([k, s]: any) => [k, $(s).text().trim()])
-  //     );
+        const data = scope
+          // @ts-expect-error
+          .map(function () {
+            return Object.fromEntries(
+              Object.entries(selector[0]).map(([k, v]) => {
+                return [k, $(this).find(v).first().text().trim()];
+              })
+            );
+          })
+          .get();
 
-  //     return { ...context, data: { ...context.data, ...data } };
-  //   }
+        return { ...context, data };
+      }
 
-  //   return { ...context, data: $(selector).text().trim() };
-  // },
+      // case: multiple strings
+      if (!scope) {
+        const data = $(selector[0])
+          .map(function () {
+            return $(this).text().trim();
+          })
+          .get();
+
+        return { ...context, data };
+      }
+
+      const data = scope
+        .find(selector[0])
+        .map(function () {
+          return $(this).text().trim();
+        })
+        .get();
+
+      return { ...context, data };
+    }
+
+    // case: single object
+    if (typeof selector === "object") {
+      if (!scope) {
+        throw new Error("Can't set an object without a defined scope.")
+      }
+
+      const data = Object.fromEntries(
+        Object.entries(selector).map(([k, s]: any) => [
+          k,
+          scope.find(s).first().text().trim(),
+        ])
+      );
+
+      return { ...context, data: { ...(context.data as Object), ...data } };
+    }
+
+    // case: single string
+    if (!scope) {
+      const data = $(selector).first().text().trim();
+      return { ...context, data };
+    }
+
+    return { ...context, data: scope.find(selector).first().text().trim() };
+  },
   async init(url: string): Promise<Context> {
     const { text } = await superagent.get(url);
     return { $: load(text), data: null, scope: null };
