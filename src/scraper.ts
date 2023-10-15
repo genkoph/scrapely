@@ -10,87 +10,95 @@ interface Context {
 }
 
 function scraper(url: string) {
-  const _commands: [string, Selector][] = [
-    ["init", url], // initial command
+  const commandsQueue: [Function, Selector][] = [
+    [init, url], // initial command
   ];
 
-  const _scraper = {
+  const commands = {
     set(selector: Selector) {
-      _commands.push(["set", selector]);
+      commandsQueue.push([set, selector]);
       return this;
     },
-    find(selector: string) {
-      _commands.push(["find", selector]);
-      return this;
-    },
-    delay(ms: number) {
-      _commands.push(["delay", ms]);
+    scope(selector: string) {
+      commandsQueue.push([scope, selector]);
       return this;
     },
     async data() {
-      const { commands, initialContext } = transformCommands(_commands);
-      const { data } = await iterateCommands(commands, initialContext);
+      const initialContext = commandsQueue[0][1];
+      const { data } = await iterateCommands(commandsQueue, initialContext);
 
       return data;
     },
   };
 
-  return _scraper;
+  return commands;
 }
 
 async function iterateCommands(
   commands: [Function, Selector][],
   context: unknown
 ): Promise<Context> {
-  const _functions = [...commands];
-  const [current, args] = _functions.shift()!;
+  const _commands = [...commands];
+  const [current, args] = _commands.shift()!;
 
   const result = await current(context, args);
 
-  if (_functions.length === 0) {
+  if (_commands.length === 0) {
     return result;
   }
 
-  return iterateCommands(_functions, result);
+  return iterateCommands(_commands, result);
 }
 
-function transformCommands(commandsRaw: [string, Selector][]) {
-  const commands: [Function, Selector][] = commandsRaw.map(
-    ([command, args]) => [commandsFunctions[command], args]
-  );
-  const initialContext = commandsRaw[0][1];
+// ------ commands ------
 
-  return { commands, initialContext };
+async function init(url: string): Promise<Context> {
+  const { text } = await superagent.get(url);
+  return { $: load(text), data: null, scope: null };
 }
 
-const commandsFunctions: Record<string, Function> = {
-  async set(context: Context, selector: string | string[]): Promise<Context> {
-    const { $, scope } = context;
+async function scope(context: Context, selector: string): Promise<Context> {
+  const { $ } = context;
+  return { ...context, scope: $(selector) };
+}
 
-    if (Array.isArray(selector)) {
-      // case: multiple objects
-      if (typeof selector[0] === "object") {
-        if (!scope) {
-          throw new Error("Can't set an array of objects without a defined scope.")
-        }
+async function set(context: Context, selector: Selector): Promise<Context> {
+  const { $, scope } = context;
 
-        const data = scope
-          // @ts-expect-error
-          .map(function () {
-            return Object.fromEntries(
-              Object.entries(selector[0]).map(([k, v]) => {
-                return [k, $(this).find(v).first().text().trim()];
-              })
-            );
-          })
-          .get();
+  if (Array.isArray(selector)) {
+    const _selector = selector[0];
 
-        return { ...context, data };
+    // case: multiple objects
+    if (typeof _selector === "object") {
+      if (!scope) {
+        throw new Error("Can't set an object without a defined scope.");
       }
 
-      // case: multiple strings
+      const data = scope
+        // @ts-expect-error
+        .map(function () {
+          return Object.fromEntries(
+            Object.entries(_selector).map(([k, v]) => {
+              return [
+                k,
+                $(this)
+                  .find(v as string)
+                  .first()
+                  .text()
+                  .trim(),
+              ];
+            })
+          );
+        })
+        .get();
+
+      return { ...context, data };
+    }
+
+    // case: multiple strings
+    if (typeof _selector === "string") {
       if (!scope) {
-        const data = $(selector[0])
+        const data = $(_selector)
           .map(function () {
             return $(this).text().trim();
           })
@@ -100,7 +108,7 @@ const commandsFunctions: Record<string, Function> = {
       }
 
       const data = scope
-        .find(selector[0])
+        .find(_selector)
         .map(function () {
           return $(this).text().trim();
         })
@@ -109,42 +117,36 @@ const commandsFunctions: Record<string, Function> = {
       return { ...context, data };
     }
 
-    // case: single object
-    if (typeof selector === "object") {
-      if (!scope) {
-        throw new Error("Can't set an object without a defined scope.")
-      }
+    return context;
+  }
 
-      const data = Object.fromEntries(
-        Object.entries(selector).map(([k, s]: any) => [
-          k,
-          scope.find(s).first().text().trim(),
-        ])
-      );
-
-      return { ...context, data: { ...(context.data as Object), ...data } };
+  // case: single object
+  if (typeof selector === "object") {
+    if (!scope) {
+      throw new Error("Can't set an object without a defined scope.");
     }
 
-    // case: single string
+    const data = Object.fromEntries(
+      Object.entries(selector).map(([k, s]: any) => [
+        k,
+        scope.find(s).first().text().trim(),
+      ])
+    );
+
+    return { ...context, data: { ...(context.data as Object), ...data } };
+  }
+
+  // case: single string
+  if (typeof selector === "string") {
     if (!scope) {
       const data = $(selector).first().text().trim();
       return { ...context, data };
     }
 
     return { ...context, data: scope.find(selector).first().text().trim() };
-  },
-  async init(url: string): Promise<Context> {
-    const { text } = await superagent.get(url);
-    return { $: load(text), data: null, scope: null };
-  },
-  async find(context: Context, selector: string): Promise<Context> {
-    const { $ } = context;
-    return { ...context, scope: $(selector) };
-  },
-  async delay(context: Context, ms: number): Promise<Context> {
-    await new Promise((resolve) => setTimeout(resolve, ms));
-    return context;
-  },
-};
+  }
+
+  return context;
+}
 
 export default scraper;
