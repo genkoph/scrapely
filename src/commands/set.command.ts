@@ -24,7 +24,7 @@ async function set(context: Context, selector: Selector): Promise<Context> {
           };
 
           return Object.fromEntries(
-            // @ts-expect-error
+            // @ts-expect-error dumb type
             Object.entries(selector[0]).map(parseSelectorKV)
           );
         })
@@ -103,7 +103,7 @@ async function set(context: Context, selector: Selector): Promise<Context> {
       Object.entries(selector).map(parseSelectorKV)
     );
 
-    return { ...context, data: { ...(context.data as Object), ...data } };
+    return { ...context, data: { ...(context.data as object), ...data } };
   }
 
   // case: single string

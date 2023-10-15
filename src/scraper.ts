@@ -4,6 +4,7 @@ import scope from "@/commands/scope.command";
 import type { Context, Selector } from "@/types";
 
 function scraper(url: string) {
+  // eslint-disable-next-line
   const commandsQueue: [(...args: any[]) => Promise<Context>, Selector][] = [
     [init, url], // initial command
   ];
@@ -27,6 +28,7 @@ function scraper(url: string) {
 }
 
 async function executeCommands(
+  // eslint-disable-next-line
   commands: [(...args: any[]) => Promise<Context>, Selector][],
   context: unknown
 ): Promise<Selector | null> {

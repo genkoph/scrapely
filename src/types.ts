@@ -1,6 +1,6 @@
 import type { CheerioAPI, Cheerio, AnyNode } from "cheerio";
 
-export type Selector = string | Object | (string | Object)[];
+export type Selector = string | object | (string | object)[];
 
 export interface Context {
   $: CheerioAPI;
