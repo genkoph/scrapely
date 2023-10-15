@@ -4,7 +4,7 @@ import scope from "./commands/scope.command";
 import type { Context, Selector } from "./types";
 
 function scraper(url: string) {
-  const commandsQueue: [Function, Selector][] = [
+  const commandsQueue: [(...args: any[]) => Promise<Context>, Selector][] = [
     [init, url], // initial command
   ];
 
@@ -19,9 +19,7 @@ function scraper(url: string) {
     },
     async data() {
       const initialContext = commandsQueue[0][1];
-      const { data } = await executeCommands(commandsQueue, initialContext);
-
-      return data;
+      return executeCommands(commandsQueue, initialContext);
     },
   };
 
@@ -29,16 +27,16 @@ function scraper(url: string) {
 }
 
 async function executeCommands(
-  commands: [Function, Selector][],
+  commands: [(...args: any[]) => Promise<Context>, Selector][],
   context: unknown
-): Promise<Context> {
+): Promise<Selector | null> {
   const _commands = [...commands];
   const [current, args] = _commands.shift()!;
 
   const result = await current(context, args);
 
   if (_commands.length === 0) {
-    return result;
+    return result.data;
   }
 
   return executeCommands(_commands, result);
