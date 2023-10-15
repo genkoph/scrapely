@@ -79,7 +79,7 @@ async function set(context: Context, selector: Selector): Promise<Context> {
       return { ...context, data };
     }
 
-    return context;
+    throw new Error(`Unsupported Selector: ${selector[0]}`);
   }
 
   // case: single object
@@ -130,7 +130,7 @@ async function set(context: Context, selector: Selector): Promise<Context> {
     return { ...context, data };
   }
 
-  return context;
+  throw new Error(`Unsupported Selector: ${selector}`);
 }
 
 export default set;
