@@ -1,7 +1,6 @@
 import set from "@/commands/set.command";
 import init from "@/commands/init.command";
 import scope from "@/commands/scope.command";
-
 import type { Context, Selector } from "@/types";
 
 function scraper(url: string) {
@@ -10,11 +9,11 @@ function scraper(url: string) {
   ];
 
   const commands = {
-    set(selector: Selector) {
+    set(selector: Parameters<typeof set>[1]) {
       commandsQueue.push([set, selector]);
       return this;
     },
-    scope(selector: string) {
+    scope(selector: Parameters<typeof scope>[1]) {
       commandsQueue.push([scope, selector]);
       return this;
     },
