@@ -1,13 +1,9 @@
-import scraper from "./scraper";
+import Scraper from "./scraper";
 
 async function main() {
   const url = "https://www.scrapethissite.com/pages/simple";
 
-  // const scraper = Scraper({
-  //   delay: 20,
-  //   throttle: 80,
-  //   concurrency: 4
-  // });
+  const scraper = Scraper();
 
   const data = await scraper(url).scope(".country").set([{
     name: ".country-name",
