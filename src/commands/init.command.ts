@@ -3,9 +3,19 @@ import superagent from "superagent";
 
 import type { Context } from "@/types";
 
-async function init(url: string): Promise<Context> {
-  const { text } = await superagent.get(url);
-  return { $: load(text), data: null, scope: null };
+
+function isUrl(str: string) {
+  const urlRegex = /^(https?|ftp):\/\/[^\s/$.?#].[^\s]*$/i;
+  return urlRegex.test(str);
+}
+
+async function init(source: string): Promise<Context> {
+  if (isUrl(source)) {
+    const { text } = await superagent.get(source);
+    return { $: load(text), data: null, scope: null };
+  }
+
+  return { $: load(source), data: null, scope: null };
 }
 
 export default init;

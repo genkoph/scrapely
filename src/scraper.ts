@@ -3,10 +3,10 @@ import init from "@/commands/init.command";
 import scope from "@/commands/scope.command";
 import type { Context, Selector } from "@/types";
 
-function scraper(url: string) {
+function scraper(source: string) {
   // eslint-disable-next-line
   const commandsQueue: [(...args: any[]) => Promise<Context>, Selector][] = [
-    [init, url], // initial command
+    [init, source], // initial command
   ];
 
   const commands = {
