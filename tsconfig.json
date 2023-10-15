@@ -7,11 +7,11 @@
     "forceConsistentCasingInFileNames": true,
     "baseUrl": ".",
     "paths": {
-      "@/types": ["./src/types.ts"],
-      "@/commands/*": ["./src/commands/*"],
+      "@/*": ["./src/*"],
     }
   },
   "include": [
-    "src/**/*"
+    "src/**/*",
+    "tests/**/*"
   ],
 }
