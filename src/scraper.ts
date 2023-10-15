@@ -25,7 +25,7 @@ function scraper(url: string) {
     },
     async data() {
       const initialContext = commandsQueue[0][1];
-      const { data } = await iterateCommands(commandsQueue, initialContext);
+      const { data } = await executeCommands(commandsQueue, initialContext);
 
       return data;
     },
@@ -34,7 +34,7 @@ function scraper(url: string) {
   return commands;
 }
 
-async function iterateCommands(
+async function executeCommands(
   commands: [Function, Selector][],
   context: unknown
 ): Promise<Context> {
@@ -47,7 +47,7 @@ async function iterateCommands(
     return result;
   }
 
-  return iterateCommands(_commands, result);
+  return executeCommands(_commands, result);
 }
 
 // ------ commands ------
@@ -66,28 +66,28 @@ async function set(context: Context, selector: Selector): Promise<Context> {
   const { $, scope } = context;
 
   if (Array.isArray(selector)) {
-    const _selector = selector[0];
-
     // case: multiple objects
-    if (typeof _selector === "object") {
+    if (typeof selector[0] === "object") {
       if (!scope) {
         throw new Error("Can't set an object without a defined scope.");
       }
 
       const data = scope
-        // @ts-expect-error
         .map(function () {
+          const parseSelectorKV = ([k, s]: string[]) => {
+            const attr = s.match(/(?<=@)[a-z]+/)?.[0] || "";
+            const _s = s.replace(/@[a-z]+/, "");
+
+            if (attr) {
+              return [k, $(this).find(_s).first().attr(attr)];
+            }
+
+            return [k, $(this).find(_s).first().text().trim()];
+          };
+
           return Object.fromEntries(
-            Object.entries(_selector).map(([k, v]) => {
-              return [
-                k,
-                $(this)
-                  .find(v as string)
-                  .first()
-                  .text()
-                  .trim(),
-              ];
-            })
+            // @ts-expect-error
+            Object.entries(selector[0]).map(parseSelectorKV)
           );
         })
         .get();
@@ -96,11 +96,35 @@ async function set(context: Context, selector: Selector): Promise<Context> {
     }
 
     // case: multiple strings
-    if (typeof _selector === "string") {
+    if (typeof selector[0] === "string") {
+      const attr = selector[0].match(/(?<=@)[a-z]+/)?.[0] || "";
+      const _selector = selector[0].replace(/@[a-z]+/, "");
+
       if (!scope) {
+        if (attr) {
+          const data = $(_selector)
+            .map(function () {
+              return $(this).attr(attr);
+            })
+            .get();
+
+          return { ...context, data };
+        }
+
         const data = $(_selector)
           .map(function () {
             return $(this).text().trim();
+          })
+          .get();
+
+        return { ...context, data };
+      }
+
+      if (attr) {
+        const data = scope
+          .find(_selector)
+          .map(function () {
+            return $(this).attr(attr);
           })
           .get();
 
@@ -126,11 +150,19 @@ async function set(context: Context, selector: Selector): Promise<Context> {
       throw new Error("Can't set an object without a defined scope.");
     }
 
+    const parseSelectorKV = ([k, s]: string[]) => {
+      const attr = s.match(/(?<=@)[a-z]+/)?.[0] || "";
+      const _s = s.replace(/@[a-z]+/, "");
+
+      if (attr) {
+        return [k, scope.find(_s).first().attr(attr)];
+      }
+
+      return [k, scope.find(_s).first().text().trim()];
+    };
+
     const data = Object.fromEntries(
-      Object.entries(selector).map(([k, s]: any) => [
-        k,
-        scope.find(s).first().text().trim(),
-      ])
+      Object.entries(selector).map(parseSelectorKV)
     );
 
     return { ...context, data: { ...(context.data as Object), ...data } };
@@ -138,12 +170,26 @@ async function set(context: Context, selector: Selector): Promise<Context> {
 
   // case: single string
   if (typeof selector === "string") {
+    const attr = selector.match(/(?<=@)[a-z]+/)?.[0] || "";
+    const _selector = selector.replace(/@[a-z]+/, "");
+
     if (!scope) {
-      const data = $(selector).first().text().trim();
+      if (attr) {
+        const data = $(_selector).first().attr(attr) || null;
+        return { ...context, data };
+      }
+
+      const data = $(_selector).first().text().trim();
       return { ...context, data };
     }
 
-    return { ...context, data: scope.find(selector).first().text().trim() };
+    if (attr) {
+      const data = scope.find(_selector).first().attr(attr) || null;
+      return { ...context, data };
+    }
+
+    const data = scope.find(_selector).first().text().trim();
+    return { ...context, data };
   }
 
   return context;
