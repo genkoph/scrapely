@@ -1,4 +1,4 @@
-import type { Context } from "../types";
+import type { Context } from "@/types";
 
 async function scope(context: Context, selector: string): Promise<Context> {
   const { $ } = context;

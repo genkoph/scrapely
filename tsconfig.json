@@ -5,6 +5,11 @@
     "module": "commonjs",
     "esModuleInterop": true,
     "forceConsistentCasingInFileNames": true,
+    "baseUrl": ".",
+    "paths": {
+      "@/types": ["./src/types.ts"],
+      "@/commands/*": ["./src/commands/*"],
+    }
   },
   "include": [
     "src/**/*"

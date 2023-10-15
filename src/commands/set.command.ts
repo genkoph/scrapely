@@ -1,4 +1,4 @@
-import type { Context, Selector } from "../types";
+import type { Context, Selector } from "@/types";
 
 async function set(context: Context, selector: Selector): Promise<Context> {
   const { $, scope } = context;

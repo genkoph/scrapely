@@ -1,7 +1,8 @@
-import set from "./commands/set.command";
-import init from "./commands/init.command";
-import scope from "./commands/scope.command";
-import type { Context, Selector } from "./types";
+import set from "@/commands/set.command";
+import init from "@/commands/init.command";
+import scope from "@/commands/scope.command";
+
+import type { Context, Selector } from "@/types";
 
 function scraper(url: string) {
   const commandsQueue: [(...args: any[]) => Promise<Context>, Selector][] = [

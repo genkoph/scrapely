@@ -1,5 +1,5 @@
-import superagent from "superagent";
 import { load } from "cheerio";
+import superagent from "superagent";
 
 import type { Context } from "../types";
 
