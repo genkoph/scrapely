@@ -7,13 +7,14 @@ async function set(context: Context, selector: Selector): Promise<Context> {
 
   const _selector: string | object = isMultiple ? selector[0] : selector;
 
-  if (!scope && typeof _selector === "object") {
-    throw new Error("Can't set an object without a defined scope.");
+  if (!scope && isMultiple && typeof _selector === "object") {
+    throw new Error("To set an array of objects, you must have a defined scope");
   }
 
   if (typeof _selector === "object") {
+    // case: multiple object
     if (isMultiple) {
-      function mapNodes(i: number, node: AnyNode) {
+      function mapNodes(_: number, node: AnyNode) {
         return Object.fromEntries(
           Object.entries(_selector).map(([k, s]: string[]) => {
             const attr = s.match(/(?<=@)[a-z]+/)?.[0] || "";
@@ -34,12 +35,13 @@ async function set(context: Context, selector: Selector): Promise<Context> {
       return { ...context, data };
     }
 
+    // case: single object
     const data = Object.fromEntries(
       Object.entries(_selector).map(([k, s]: string[]) => {
         const attr = s.match(/(?<=@)[a-z]+/)?.[0] || "";
         const _s = s.replace(/@[a-z]+/, "");
 
-        const node = scope!.find(_s).first();
+        const node = scope ? scope.find(_s).first() : $(_s).first();
 
         return attr ? [k, node?.attr(attr) || null] : [k, node?.text().trim()];
       })
@@ -50,10 +52,11 @@ async function set(context: Context, selector: Selector): Promise<Context> {
 
   if (typeof _selector === "string") {
     const attr = _selector.match(/(?<=@)[a-z]+/)?.[0] || "";
-    const selectorClean = _selector.replace(/@[a-z]+/, "");
+    const __selector = _selector.replace(/@[a-z]+/, "");
 
+    // case: multiple strings
     if (isMultiple) {
-      const nodes = scope ? scope.find(selectorClean) : $(selectorClean);
+      const nodes = scope ? scope.find(__selector) : $(__selector);
 
       function mapNodes(i: number, n: AnyNode) {
         return attr ? $(n).attr(attr) || null : $(n).text().trim();
@@ -63,13 +66,14 @@ async function set(context: Context, selector: Selector): Promise<Context> {
       return { ...context, data };
     }
 
-    const node = scope ? scope.find(selectorClean) : $(selectorClean);
+    // case: single string
+    const node = scope ? scope.find(__selector).first() : $(__selector).first();
+    const data = attr ? node.attr(attr) || null : node.text().trim();
 
-    const data = attr ? node.attr(attr) || null : node.first().text().trim();
     return { ...context, data };
   }
 
-  throw new Error(`Unsupported Selector: ${selector}`);
+  throw new Error(`Selector must be of type "string" or "object".`);
 }
 
 export default set;
