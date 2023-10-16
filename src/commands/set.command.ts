@@ -1,132 +1,71 @@
+import type { AnyNode } from "cheerio";
 import type { Context, Selector } from "@/types";
 
 async function set(context: Context, selector: Selector): Promise<Context> {
   const { $, scope } = context;
+  const isMultiple = Array.isArray(selector);
 
-  if (Array.isArray(selector)) {
-    // case: multiple objects
-    if (typeof selector[0] === "object") {
-      if (!scope) {
-        throw new Error("Can't set an object without a defined scope.");
-      }
+  const _selector: string | object = isMultiple ? selector[0] : selector;
 
-      const data = scope
-        .map(function () {
-          const parseSelectorKV = ([k, s]: string[]) => {
+  if (!scope && typeof _selector === "object") {
+    throw new Error("Can't set an object without a defined scope.");
+  }
+
+  if (typeof _selector === "object") {
+    if (isMultiple) {
+      function mapNodes(i: number, node: AnyNode) {
+        return Object.fromEntries(
+          Object.entries(_selector).map(([k, s]: string[]) => {
             const attr = s.match(/(?<=@)[a-z]+/)?.[0] || "";
             const _s = s.replace(/@[a-z]+/, "");
 
-            if (attr) {
-              return [k, $(this).find(_s).first().attr(attr)];
-            }
+            const current = $(node).find(_s).first();
 
-            return [k, $(this).find(_s).first().text().trim()];
-          };
+            return attr
+              ? [k, current.attr(attr) || null]
+              : [k, current.text().trim()];
+          })
+        );
+      }
 
-          return Object.fromEntries(
-            // @ts-expect-error dumb type
-            Object.entries(selector[0]).map(parseSelectorKV)
-          );
-        })
-        .get();
+      // @ts-expect-error dumb error
+      const data = scope!.map(mapNodes).get();
 
       return { ...context, data };
     }
-
-    // case: multiple strings
-    if (typeof selector[0] === "string") {
-      const attr = selector[0].match(/(?<=@)[a-z]+/)?.[0] || "";
-      const _selector = selector[0].replace(/@[a-z]+/, "");
-
-      if (!scope) {
-        if (attr) {
-          const data = $(_selector)
-            .map(function () {
-              return $(this).attr(attr);
-            })
-            .get();
-
-          return { ...context, data };
-        }
-
-        const data = $(_selector)
-          .map(function () {
-            return $(this).text().trim();
-          })
-          .get();
-
-        return { ...context, data };
-      }
-
-      if (attr) {
-        const data = scope
-          .find(_selector)
-          .map(function () {
-            return $(this).attr(attr);
-          })
-          .get();
-
-        return { ...context, data };
-      }
-
-      const data = scope
-        .find(_selector)
-        .map(function () {
-          return $(this).text().trim();
-        })
-        .get();
-
-      return { ...context, data };
-    }
-
-    throw new Error(`Unsupported Selector: ${selector[0]}`);
-  }
-
-  // case: single object
-  if (typeof selector === "object") {
-    if (!scope) {
-      throw new Error("Can't set an object without a defined scope.");
-    }
-
-    const parseSelectorKV = ([k, s]: string[]) => {
-      const attr = s.match(/(?<=@)[a-z]+/)?.[0] || "";
-      const _s = s.replace(/@[a-z]+/, "");
-
-      if (attr) {
-        return [k, scope.find(_s).first().attr(attr)];
-      }
-
-      return [k, scope.find(_s).first().text().trim()];
-    };
 
     const data = Object.fromEntries(
-      Object.entries(selector).map(parseSelectorKV)
+      Object.entries(_selector).map(([k, s]: string[]) => {
+        const attr = s.match(/(?<=@)[a-z]+/)?.[0] || "";
+        const _s = s.replace(/@[a-z]+/, "");
+
+        const node = scope!.find(_s).first();
+
+        return attr ? [k, node?.attr(attr) || null] : [k, node?.text().trim()];
+      })
     );
 
-    return { ...context, data: { ...(context.data as object), ...data } };
+    return { ...context, data };
   }
 
-  // case: single string
-  if (typeof selector === "string") {
-    const attr = selector.match(/(?<=@)[a-z]+/)?.[0] || "";
-    const _selector = selector.replace(/@[a-z]+/, "");
+  if (typeof _selector === "string") {
+    const attr = _selector.match(/(?<=@)[a-z]+/)?.[0] || "";
+    const selectorClean = _selector.replace(/@[a-z]+/, "");
 
-    if (!scope) {
-      if (attr) {
-        const data = $(_selector).first().attr(attr) || null;
-        return { ...context, data };
+    if (isMultiple) {
+      const nodes = scope ? scope.find(selectorClean) : $(selectorClean);
+
+      function mapNodes(i: number, n: AnyNode) {
+        return attr ? $(n).attr(attr) || null : $(n).text().trim();
       }
 
-      const data = $(_selector).first().text().trim();
+      const data = nodes.map(mapNodes).get();
       return { ...context, data };
     }
 
-    if (attr) {
-      const data = scope.find(_selector).first().attr(attr) || null;
-      return { ...context, data };
-    }
+    const node = scope ? scope.find(selectorClean) : $(selectorClean);
 
-    const data = scope.find(_selector).first().text().trim();
+    const data = attr ? node.attr(attr) || null : node.first().text().trim();
     return { ...context, data };
   }
 
