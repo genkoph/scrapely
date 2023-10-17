@@ -6,7 +6,7 @@
   "types": "build/index.d.ts",
   "scripts": {
     "lint": "eslint src tests",
-    "build": "tsup --dts --sourcemap",
+    "build": "tsup --dts",
     "test": "vitest run",
     "test:watch": "vitest watch"
   },
