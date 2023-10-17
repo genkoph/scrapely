@@ -1,12 +1,18 @@
 {
   "name": "scraper",
   "license": "MIT",
-  "version": "0.0.1",
+  "version": "0.0.0",
+  "main": "build/index.js",
+  "types": "build/index.d.ts",
   "scripts": {
     "lint": "eslint .",
-    "build": "tsc",
+    "build": "tsup --dts --sourcemap",
     "test": "vitest run",
     "test:watch": "vitest watch"
+  },
+  "dependencies": {
+    "cheerio": "^1.0.0-rc.12",
+    "superagent": "^8.1.2"
   },
   "devDependencies": {
     "@types/node": "^20.8.6",
@@ -14,13 +20,8 @@
     "@typescript-eslint/eslint-plugin": "^6.7.5",
     "@typescript-eslint/parser": "^6.7.5",
     "eslint": "^8.51.0",
-    "ts-node": "^10.9.1",
-    "tsconfig-paths": "^4.2.0",
+    "tsup": "^7.2.0",
     "typescript": "^5.2.2",
     "vitest": "^0.34.6"
-  },
-  "dependencies": {
-    "cheerio": "^1.0.0-rc.12",
-    "superagent": "^8.1.2"
   }
 }

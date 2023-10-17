@@ -8,7 +8,7 @@
   "plugins": [
     "@typescript-eslint"
   ],
-  "ignorePatterns": ["build/**/*", "**/*.js"],
+  "ignorePatterns": ["build/**/*", "**/*.js", "**/*.mjs"],
   "rules": {
     "no-inner-declarations": "off"
   }
