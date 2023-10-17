@@ -5,7 +5,7 @@
   "main": "build/index.js",
   "types": "build/index.d.ts",
   "scripts": {
-    "lint": "eslint .",
+    "lint": "eslint src tests",
     "build": "tsup --dts --sourcemap",
     "test": "vitest run",
     "test:watch": "vitest watch"
