@@ -12,7 +12,6 @@
     "declarationMap": true,
     "isolatedModules": true,
     "esModuleInterop": true,
-    "types": ["vitest/globals"],
     "emitDeclarationOnly": true,
     "forceConsistentCasingInFileNames": true,
   },
