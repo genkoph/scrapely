@@ -11,12 +11,10 @@
     "test:watch": "vitest watch"
   },
   "dependencies": {
-    "cheerio": "^1.0.0-rc.12",
-    "superagent": "^8.1.2"
+    "node-html-parser": "^6.1.10"
   },
   "devDependencies": {
     "@types/node": "^20.8.6",
-    "@types/superagent": "^4.1.19",
     "@typescript-eslint/eslint-plugin": "^6.7.5",
     "@typescript-eslint/parser": "^6.7.5",
     "eslint": "^8.51.0",

@@ -1,51 +1,44 @@
-import set from "@/commands/set.command";
-import init from "@/commands/init.command";
-import scope from "@/commands/scope.command";
-import type { Context, Selector } from "@/types";
+import init from "@/methods/init.method";
+import data from "@/methods/data.method";
+import scope from "@/methods/scope.method";
+
+import type { Selector } from "@/types";
 
 function Scraper() {
   return scraper;
 }
 
 function scraper(source: string) {
-  // eslint-disable-next-line
-  const commandsQueue: [(...args: any[]) => Promise<Context>, Selector][] = [
-    [init, source], // initial command
-  ];
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
+  const methodQueue: [(...args: any[]) => any, unknown][] = [[init, source]]; // initial method
 
-  const commands = {
-    set(selector: Parameters<typeof set>[1]) {
-      commandsQueue.push([set, selector]);
-      return this;
+  return {
+    scope(selector: string | string[]) {
+      methodQueue.push([scope, selector]);
+      return { data: this.data };
     },
-    scope(selector: Parameters<typeof scope>[1]) {
-      commandsQueue.push([scope, selector]);
-      return this;
-    },
-    async data() {
-      const initialContext = commandsQueue[0][1];
-      return executeCommands(commandsQueue, initialContext);
+    async data(selector: Selector | Selector[]) {
+      methodQueue.push([data, selector]);
+      return iterateMethods(methodQueue, methodQueue[0][1]);
     },
   };
-
-  return commands;
 }
 
-async function executeCommands(
+async function iterateMethods(
   // eslint-disable-next-line
-  commands: [(...args: any[]) => Promise<Context>, Selector][],
+  methods: [Function, unknown][],
   context: unknown
 ): Promise<Selector | null> {
-  const _commands = [...commands];
-  const [current, args] = _commands.shift()!;
+  const _methods = [...methods];
+  const [current, args] = _methods.shift()!;
 
   const result = await current(context, args);
 
-  if (_commands.length === 0) {
-    return result.data;
+  if (_methods.length === 0) {
+    return result;
   }
 
-  return executeCommands(_commands, result);
+  return iterateMethods(_methods, result);
 }
 
 export default Scraper;

@@ -1,9 +1,8 @@
-import type { CheerioAPI, Cheerio, AnyNode } from "cheerio";
+import type { HTMLElement } from "node-html-parser";
 
-export type Selector = string | object | (string | object)[];
+export type Selector = string | object;
 
 export interface Context {
-  $: CheerioAPI;
-  data: Selector | null;
-  scope: Cheerio<AnyNode> | null;
+  root: HTMLElement;
+  scope: (HTMLElement | HTMLElement[]) | null;
 }
