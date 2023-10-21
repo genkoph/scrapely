@@ -1,5 +1,5 @@
-import Scraper from "@/scraper";
+import Scrapely from "@/scrapely";
 
-export { Scraper };
+export { Scrapely };
 
 export type { Context, Selector } from "@/types";
