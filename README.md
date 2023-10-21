@@ -7,6 +7,12 @@
 
 ![image](https://github.com/kborisov00/scrapely/assets/53948066/04f650a1-703c-4610-b6b6-3e6ead7c752b)
 
+## Table of Contents
+
+<div>
+  <a href="#overview">Overview</a> • <a href="#features">Features</a> • <a href="#usage">Usage</a> • <a href="#example">Example</a> • <a href="#license">License</a>
+</div>
+
 ## Overview
 
 TODO
