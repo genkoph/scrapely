@@ -6,11 +6,14 @@
   "module": "build/index.mjs",
   "types": "build/index.d.ts",
   "description": "The most simple JavaScript scraping framework",
+  "private": false,
   "scripts": {
     "lint": "eslint src tests | tsc",
     "build": "tsup --format cjs,esm --dts",
     "test": "vitest run",
-    "test:watch": "vitest watch"
+    "test:watch": "vitest watch",
+    "prerelease": "yarn lint && yarn test && yarn build",
+    "release": "changeset publish"
   },
   "dependencies": {
     "node-html-parser": "^6.1.10"
@@ -24,5 +27,8 @@
     "tsup": "^7.2.0",
     "typescript": "^5.2.2",
     "vitest": "^0.34.6"
+  },
+  "publishConfig": {
+    "access": "public"
   }
 }
