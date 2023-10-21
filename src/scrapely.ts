@@ -4,10 +4,6 @@ import scope from "@/methods/scope.method";
 
 import type { Selector } from "@/types";
 
-function Scrapely() {
-  return scrapely;
-}
-
 function scrapely(source: string) {
   // eslint-disable-next-line @typescript-eslint/no-explicit-any
   const methodQueue: [(...args: any[]) => any, unknown][] = [[init, source]]; // initial method
@@ -41,4 +37,4 @@ async function iterateMethods(
   return iterateMethods(_methods, result);
 }
 
-export default Scrapely;
+export default scrapely;
