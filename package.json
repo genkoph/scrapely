@@ -6,7 +6,7 @@
   "module": "build/index.mjs",
   "types": "build/index.d.ts",
   "scripts": {
-    "lint": "eslint src tests",
+    "lint": "eslint src | tsc",
     "build": "tsup --format cjs,esm --dts",
     "test": "vitest run",
     "test:watch": "vitest watch"
