@@ -19,7 +19,7 @@ function scrapely(source: string) {
     },
     async data(selector: Selector | Selector[]) {
       methodQueue.push([data, selector]);
-      return iterateMethods(methodQueue, methodQueue[0][1]);
+      return iterateMethods(methodQueue, methodQueue[0]![1]);
     },
   };
 }

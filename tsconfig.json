@@ -13,7 +13,8 @@
     "isolatedModules": true,
     "esModuleInterop": true,
     "emitDeclarationOnly": true,
-    "forceConsistentCasingInFileNames": true,
+    "noUncheckedIndexedAccess": true,
+    "forceConsistentCasingInFileNames": true
   },
   "include": ["src/**/*", "tests/**/*"],
 }
