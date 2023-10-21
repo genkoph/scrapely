@@ -5,6 +5,7 @@
   "main": "build/index.js",
   "module": "build/index.mjs",
   "types": "build/index.d.ts",
+  "description": "The most simple JavaScript scraping framework",
   "scripts": {
     "lint": "eslint src | tsc",
     "build": "tsup --format cjs,esm --dts",
