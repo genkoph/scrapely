@@ -9,12 +9,32 @@ async function data(context: Context, selectorRaw: Selector | Selector[]) {
 
   const selector: Selector = isSelectorArray ? selectorRaw[0] : selectorRaw;
 
+  function handleAttribute(attr: string, node: HTMLElement | null) {
+    const value = node?.getAttribute(attr);
+
+    if (!value) {
+      return null;
+    }
+
+    if (attr === "href") {
+      const isAbsoluteRegex = new RegExp('^(?:[a-z+]+:)?//', 'i');
+
+      if (isAbsoluteRegex.test(value)) {
+        return value;
+      }
+
+      return `${context.origin}${value}`;
+    }
+
+    return value;
+  }
+
   if (typeof selector === "string") {
     const { attr, selector: _selector } = parseString(selector);
 
     function parseSelector(sourceNode: HTMLElement) {
       function parseNode(node: HTMLElement | null) {
-        return attr ? node?.getAttribute(attr) : node?.text.trim();
+        return attr ? handleAttribute(attr, node) : node?.text.trim();
       }
 
       return isSelectorArray
@@ -43,7 +63,7 @@ async function data(context: Context, selectorRaw: Selector | Selector[]) {
         Object.entries(selector).map(([k, s]) => {
           const { attr, selector } = parseString(s);
           const node = sourceNode.querySelector(selector);
-          return [k, attr ? node?.getAttribute(attr) : node?.text.trim()];
+          return [k, attr ? handleAttribute(attr, node) : node?.text.trim()];
         })
       );
     }

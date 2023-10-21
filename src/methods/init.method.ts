@@ -10,10 +10,12 @@ async function init(source: string): Promise<Context> {
     const response = await fetch(source);
     const text = await response.text();
 
-    return { root: parse(text), scope: null, url: source };
+    const { origin } = new URL(source);
+
+    return { root: parse(text), origin, scope: null };
   }
 
-  return { root: parse(source), scope: null, url: null };
+  return { root: parse(source), origin: null, scope: null };
 }
 
 export default init;
