@@ -3,10 +3,11 @@
   "license": "MIT",
   "version": "0.0.1",
   "main": "build/index.js",
+  "module": "build/index.mjs",
   "types": "build/index.d.ts",
   "scripts": {
     "lint": "eslint src tests",
-    "build": "tsup --dts",
+    "build": "tsup --format cjs,esm --dts",
     "test": "vitest run",
     "test:watch": "vitest watch"
   },
