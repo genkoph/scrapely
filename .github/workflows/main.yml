@@ -1,3 +1,5 @@
+name: test, lint and build
+run-name: test, lint and build
 on:
   push:
     branches:
