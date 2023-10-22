@@ -1,5 +1,11 @@
 # scrapely
 
+## 0.0.4
+
+### Patch Changes
+
+- Update README to indicate supported node version
+
 ## 0.0.3
 
 ### Patch Changes
