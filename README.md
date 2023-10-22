@@ -5,7 +5,7 @@
 
 > The most simple JavaScript scraping framework
 
-![image](https://github.com/kborisov00/scrapely/assets/53948066/04f650a1-703c-4610-b6b6-3e6ead7c752b)
+![image](https://github.com/genkoph/scrapely/assets/53948066/47599601-e4c6-4c5c-ad4a-32c5540e4511)
 
 ## Table of Contents
 
