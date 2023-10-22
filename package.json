@@ -7,6 +7,9 @@
   "types": "build/index.d.ts",
   "description": "The most simple JavaScript scraping framework",
   "private": false,
+  "engines": {
+    "node": ">=18.0.0"
+  },
   "scripts": {
     "lint": "eslint src tests | tsc",
     "build": "tsup --format cjs,esm --dts",
