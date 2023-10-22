@@ -1,6 +1,6 @@
 ## Scrapely
 
-![npm](https://img.shields.io/npm/v/scrapely) ![GitHub](https://img.shields.io/github/license/kborisov00/scrapely) ![GitHub Workflow Status (with event)](https://img.shields.io/github/actions/workflow/status/kborisov00/scrapely/test.yml)
+![npm](https://img.shields.io/npm/v/scrapely) ![GitHub](https://img.shields.io/github/license/kborisov00/scrapely) ![GitHub Workflow Status (with event)](https://img.shields.io/github/actions/workflow/status/kborisov00/scrapely/test.yml) ![node-current](https://img.shields.io/node/v/scrapely)
 
 
 > The most simple JavaScript scraping framework
